@@ -36,65 +36,130 @@ The ROS master was started using:
 
 ---
 
-# Robot Setup and Communication
+# ROS Communication Setup
 
-Communication with the robot was established using ROS topics.
+The robot is controlled using ROS topics.
 
-The ROS master was started using:
+## 1. Connect to the robot
+
+SSH into the JetAuto robot computer:
+
+
+ssh jetauto@<robot_ip>
+
+
+Example:
+
+
+ssh jetauto@192.168.1.102
+
+
+---
+
+## 2. Start ROS master (if not already running)
+
+On the robot:
+
+
 roscore
 
-Available ROS nodes and topics were verified using:
+
+---
+
+## 3. Verify ROS communication
+
+Check ROS environment variables:
+
+
+echo $ROS_MASTER_URI
+echo $ROS_IP
+
+
+Example expected output:
+
+
+ROS_MASTER_URI=http://192.168.1.102:11311
+
+
+---
+
+## 4. Verify ROS nodes and topics
+
+List ROS nodes:
+
+
 rosnode list
+
+
+List ROS topics:
+
+
 rostopic list
 
 
-To identify the robot velocity command topic:
+---
+
+# Identify Robot Command Topic
+
+The JetAuto robot accepts velocity commands through a `cmd_vel` topic.
+
+Find available command topics:
 
 
 rostopic list | grep cmd_vel
 
 
-The command topic was inspected using:
+Typical output:
+
+
+/cmd_vel
+/jetauto_controller/cmd_vel
+
+
+Inspect the topic:
 
 
 rostopic info /cmd_vel
+
+
+Check the message type:
+
+
+rostopic type /cmd_vel
+
+
+Display message structure:
+
+
 rosmsg show geometry_msgs/Twist
 
 
-The `geometry_msgs/Twist` message allows control of:
-
-- `linear.x` → forward/backward motion
-- `linear.y` → sideways motion
-- `angular.z` → rotational motion
-
 ---
 
-# How to Run the Project
+# Running the Motion Controller
 
-## 1 Start ROS master
-
-
-roscore
+Navigate to the project directory:
 
 
-## 2 Launch simulation (for testing)
+cd ~/catkin_ws/src/project1_jetauto
 
 
-rosrun turtlesim turtlesim_node
+Make the script executable (first time only):
 
 
-## 3 Run the motion controller
+chmod +x scripts/real_square_motion.py
 
 
-rosrun project1_jetauto real_square_motion.py
+Run the ROS node:
 
 
-## 4 Reset simulation if needed
+rosrun project1_jetauto real_square_motion.py _cmd_topic:=/cmd_vel
 
 
-rosservice call /reset
+If your robot uses a different topic:
 
----
+
+rosrun project1_jetauto real_square_motion.py _cmd_topic:=/jetauto_controller/cmd_vel
 
 # Motion Pattern
 
