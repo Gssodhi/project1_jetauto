@@ -1,0 +1,30 @@
+1. How did you establish communication with the robot?
+
+Communication with the robot was established through ROS using a shared ROS master. 
+we used roscore command to start the ROS master, and connectivity was verified using rostopic 
+list and rosnode list. The interface to the robot velocity commands was identified by listing the 
+topics and confirming the correct command topic with the rostopic info command. 
+Commands were published to the /cmd_vel topic through a ROS node.
+
+2 How is controlling the robot in Turtlesim different from controlling it in the real world?
+
+Turtlesim provides a simple environment to simulate motion in a deterministic manner without physical
+influences. In a real-world environment, the motion of a robot can be affected by various parameters 
+like slipping of the wheels, friction, surface irregularities, sensor noises, and communication delays.
+All these parameters make the motion of the robot less predictable. So, parameters that work in 
+turtlesim may need to be tuned when used in a physical environment.
+
+3. How did you control that the robot moved roughly 1 meter in each step?
+
+The robot motion was controlled using time-based velocity commands. First, a fixed velocity 
+was selected for each movement type. Then the duration of the command was adjusted through repeated
+testing until the robot traveled approximately the desired distance or rotation. This calibration
+process allowed the motion parameters to be tuned to achieve consistent movement.
+
+4. What challenges did you face making the robot move in the physical world?
+
+One of the major difficulties was to achieve accurate movements, considering the effects 
+of drift and timing. Any small mistake in velocity or timing led to over- or undershooting 
+the target distance. Accurate turning movements were another major difficulty, as small errors 
+in wheel movement cause changes in the turning angle. Environmental factors such as friction and 
+delays in command execution were some of the other issues that affected the movement of the robot.
