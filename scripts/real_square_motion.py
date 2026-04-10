@@ -58,7 +58,7 @@ class JetAutoPatternController:
        rospy.loginfo("Step 2: smooth turn")
        self.publish_for_duration(
         linear_x=0.5,
-        angular_z=0.6,
+        angular_z=0.7,
         duration=2.2
     )
 
