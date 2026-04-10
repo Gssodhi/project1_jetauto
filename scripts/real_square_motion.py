@@ -37,7 +37,7 @@ class JetAutoPatternController:
             self.pub.publish(msg)
             self.rate.sleep()
 
-        self.stop_robot()
+        #self.stop_robot()
 
     def stop_robot(self):
         msg = Twist()
@@ -45,36 +45,71 @@ class JetAutoPatternController:
         rospy.sleep(0.3)
 
     def run_once(self):
-        rospy.loginfo("Step 1: move forward")
-        self.publish_for_duration(
-            linear_x=self.forward_speed,
-            duration=self.forward_time
-        )
 
-        rospy.loginfo("Step 2: move left sideways")
-        self.publish_for_duration(
-            linear_y=self.lateral_speed,
-            duration=self.left_time
-        )
+    # ---- Side 1 (straight) ----
+       rospy.loginfo("Step 1: straight")
+       self.publish_for_duration(
+         linear_x=0.5,
+        angular_z=0.0,
+        duration=4.0
+    )
 
-        rospy.loginfo("Step 3: turn clockwise in place")
-        self.publish_for_duration(
-            angular_z=self.turn_speed,
-            duration=self.turn_time
-        )
+    # ---- Turn 1 (anticlockwise curve) ----
+       rospy.loginfo("Step 2: smooth turn")
+       self.publish_for_duration(
+        linear_x=0.5,
+        angular_z=0.6,
+        duration=2.2
+    )
 
-        rospy.loginfo("Step 4: move right sideways")
-        self.publish_for_duration(
-            linear_y=-self.lateral_speed,
-            duration=self.right_time
-        )
+    # ---- Side 2 ----
+       rospy.loginfo("Step 3: straight")
+       self.publish_for_duration(
+        linear_x=0.5,
+        angular_z=0.0,
+        duration=4.0
+    )
 
-        rospy.loginfo("Step 5: move forward while turning")
-        self.publish_for_duration(
-            linear_x=self.combo_forward_speed,
-            angular_z=self.combo_turn_speed,
-            duration=self.combo_time
-        )
+    # ---- Turn 2 ----
+       rospy.loginfo("Step 4: smooth turn")
+       self.publish_for_duration(
+        linear_x=0.5,
+        angular_z=0.7,
+        duration=2.2
+    )
+
+    # ---- Side 3 ----
+       rospy.loginfo("Step 5: straight")
+       self.publish_for_duration(
+        linear_x=0.5,
+        angular_z=0.0,
+        duration=4.0
+    )
+
+    # ---- Turn 3 ----
+       rospy.loginfo("Step 6: smooth turn")
+       self.publish_for_duration(
+        linear_x=0.5,
+        angular_z=0.7,
+        duration=2.2
+    )
+
+    # ---- Side 4 ----
+       rospy.loginfo("Step 7: straight")
+       self.publish_for_duration(
+        linear_x=0.5,
+        angular_z=0.0,
+        duration=4.0
+    )
+
+    # ---- Final Turn (return to start) ----
+       rospy.loginfo("Step 8: final smooth turn")
+       self.publish_for_duration(
+        linear_x=0.5,
+        angular_z=0.7,
+        duration=2.2
+    )
+
 
     def wait_for_start(self):
         raw_input("Place robot at start pose, then press Enter to begin...")
