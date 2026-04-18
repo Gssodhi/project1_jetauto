@@ -1,5 +1,8 @@
 # JetAuto Motion Pattern Controller
 
+## Demo Video
+Watch the demo here: https://youtube.com/shorts/lGA7h6az9sY
+
 ## Project Overview
 
 This project implements a ROS node that controls a mobile robot using velocity commands.  
@@ -75,7 +78,7 @@ echo $ROS_MASTER_URI
 echo $ROS_IP
 
 
-Example expected output:
+Expected output:
 
 
 ROS_MASTER_URI=http://192.168.1.102:11311

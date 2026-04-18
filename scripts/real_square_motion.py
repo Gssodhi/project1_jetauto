@@ -7,7 +7,7 @@ class JetAutoPatternController:
         rospy.init_node("jetauto_pattern_controller", anonymous=False)
 
         # Change this topic if your robot uses a different velocity command topic
-        cmd_topic = rospy.get_param("~cmd_topic", "/cmd_vel")
+        cmd_topic = rospy.get_param("~cmd_topic", "jetauto_controller/cmd_vel")
         self.pub = rospy.Publisher(cmd_topic, Twist, queue_size=10)
 
         # Safe engineering defaults (must be tuned on the real robot)
