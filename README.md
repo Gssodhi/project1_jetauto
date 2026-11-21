@@ -1,210 +1,74 @@
-# JetAuto Motion Pattern Controller
+# JetAuto ROS Motion Controller
 
-## Demo Video
-Watch the demo here: https://youtube.com/shorts/lGA7h6az9sY
+A ROS node that drives a physical **JetAuto** mobile robot around a rounded-square path using timed velocity commands (`geometry_msgs/Twist` on `cmd_vel`). The pattern was prototyped in Turtlesim, then calibrated on the real robot.
 
-## Project Overview
+▶️ **Demo video:** https://youtube.com/shorts/lGA7h6az9sY
 
-This project implements a ROS node that controls a mobile robot using velocity commands.  
-The robot performs a sequence of calibrated motions including forward movement, lateral motion, rotation, and a combined motion to approximately return toward the starting position.
+![ROS](https://img.shields.io/badge/ROS-1%20(catkin)-22314E?logo=ros&logoColor=white)
+![Python](https://img.shields.io/badge/Python-rospy-3776AB?logo=python&logoColor=white)
 
-The motion pattern is executed using the `geometry_msgs/Twist` message published to the robot's velocity command topic.
+Group project (Group 1), Seneca Polytechnic.
 
-The project was tested using ROS and the Turtlesim simulator to validate motion behavior before deploying on the physical robot.
+## What it does
 
----
+1. Waits for you to place the robot at its start pose and press Enter
+2. Drives one lap of the pattern:
+   - **straight side**: forward at 0.5 m/s for 4.0 s
+   - **smooth corner**: forward at 0.5 m/s while turning left at 0.7 rad/s for 2.2 s
+   - repeats the side and the corner four times
+3. Runs the lap twice, then publishes a zero-velocity command to stop the robot
 
-# Project Structure
-project1_jetauto/
-├── scripts/
-│ └── real_square_motion.py
-├── README.md
-└── answers.txt
+Every speed and duration is a ROS parameter, so the pattern can be re-tuned without editing code.
 
-- `real_square_motion.py` – main ROS node that publishes velocity commands
-- `README.md` – project documentation
-- `answers.txt` – reflection answers
+## Run it
 
----
+On the robot (or a machine sharing its ROS master):
 
-# Robot Setup and Communication
+```bash
+cd ~/catkin_ws/src
+git clone https://github.com/Gssodhi/project1_jetauto.git
+cd ~/catkin_ws && catkin_make && source devel/setup.bash
 
-Communication with the robot was established using ROS topics.
-
-The ROS master was started using:
-
-- `real_square_motion.py` – main ROS node that publishes velocity commands
-- `README.md` – project documentation
-- `answers.txt` – reflection answers
-
----
-
-# ROS Communication Setup
-
-The robot is controlled using ROS topics.
-
-## 1. Connect to the robot
-
-SSH into the JetAuto robot computer:
-
-
-ssh jetauto@<robot_ip>
-
-
-Example:
-
-
-ssh jetauto@192.168.1.102
-
-
----
-
-## 2. Start ROS master (if not already running)
-
-On the robot:
-
-
-roscore
-
-
----
-
-## 3. Verify ROS communication
-
-Check ROS environment variables:
-
-
-echo $ROS_MASTER_URI
-echo $ROS_IP
-
-
-Expected output:
-
-
-ROS_MASTER_URI=http://192.168.1.102:11311
-
-
----
-
-## 4. Verify ROS nodes and topics
-
-List ROS nodes:
-
-
-rosnode list
-
-
-List ROS topics:
-
-
-rostopic list
-
-
----
-
-# Identify Robot Command Topic
-
-The JetAuto robot accepts velocity commands through a `cmd_vel` topic.
-
-Find available command topics:
-
-
-rostopic list | grep cmd_vel
-
-
-Typical output:
-
-
-/cmd_vel
-/jetauto_controller/cmd_vel
-
-
-Inspect the topic:
-
-
-rostopic info /cmd_vel
-
-
-Check the message type:
-
-
-rostopic type /cmd_vel
-
-
-Display message structure:
-
-
-rosmsg show geometry_msgs/Twist
-
-
----
-
-# Running the Motion Controller
-
-Navigate to the project directory:
-
-
-cd ~/catkin_ws/src/project1_jetauto
-
-
-Make the script executable (first time only):
-
-
-chmod +x scripts/real_square_motion.py
-
-
-Run the ROS node:
-
-
-rosrun project1_jetauto real_square_motion.py _cmd_topic:=/cmd_vel
-
-
-If your robot uses a different topic:
-
+roscore   # if a ROS master isn't already running
 
 rosrun project1_jetauto real_square_motion.py _cmd_topic:=/jetauto_controller/cmd_vel
+```
 
-# Motion Pattern
+To find the right command topic on your robot:
 
-The robot performs the following sequence:
+```bash
+rostopic list | grep cmd_vel   # e.g. /cmd_vel, /jetauto_controller/cmd_vel
+rostopic info /cmd_vel
+rosmsg show geometry_msgs/Twist
+```
 
-1. Move forward
-2. Move left sideways
-3. Rotate 90° clockwise
-4. Move right sideways
-5. Move forward while turning to approximately return toward the starting position
+### Parameters
 
----
+| Parameter | Default | Meaning |
+|---|---|---|
+| `~cmd_topic` | `jetauto_controller/cmd_vel` | Velocity command topic |
+| `~side_speed` | `0.5` | Forward speed on straight sides (m/s) |
+| `~side_time` | `4.0` | Duration of each straight side (s) |
+| `~turn_speed` | `0.5` | Forward speed through corners (m/s) |
+| `~turn_rate` | `0.7` | Turn rate through corners (rad/s, positive = left) |
+| `~turn_time` | `2.2` | Duration of each corner (s) |
+| `~laps` | `2` | Number of laps |
 
-# Calibration Procedure
+Example: `rosrun project1_jetauto real_square_motion.py _side_time:=4.5 _turn_time:=2.0`
 
-Motion calibration was performed by adjusting the duration of each command while keeping velocity constant until the desired displacement or rotation was achieved.
+## How it was calibrated
 
-Each segment was tested independently before executing the full pattern.
+Control is **open-loop**: there's no odometry or sensor feedback, just a velocity held for a set time. To get roughly 1 m sides and clean corners, we kept each velocity fixed and tuned only the duration. Each segment was tested on its own on the real floor, adjusted until the measured distance or angle was close, and only then combined into the full pattern.
 
----
+## What we learned
 
-# Calibration Table
+- **Simulation isn't reality.** Turtlesim is deterministic. On the real robot, wheel slip, friction, uneven floors and command latency all change the result, so timings that were perfect in simulation needed re-tuning.
+- **Errors add up.** Small timing or speed errors on each segment accumulate over a lap. Turns are the most sensitive, since a slightly wrong angle sends every later side off course.
+- **Next step:** close the loop with odometry or IMU feedback, so the robot stops on measured distance and heading instead of elapsed time.
 
-| Motion | Velocity command | Target | Initial time estimate | Measured result | Final tuned time |
-|---|---|---|---|---|---|
-| Forward | `linear.x = 0.5` | ~1 m | 4.0 s | slightly short | 5.0 s |
-| Left sideways | `linear.y = 0.5` | ~1 m | 4.0 s | small drift | 5.0 s |
-| Clockwise turn | `angular.z = -0.71` | 90° | 2.0 s | under-rotation | 2.2 s |
-| Right sideways | `linear.y = -0.5` | ~1 m | 4.0 s | close | 5.0 s |
-| Forward + turn | `linear.x = 1.0`, `angular.z = 0.35` | return toward start | 4.5 s | overshoot | 5.6 s |
+## Project structure
 
----
-
-# Notes
-
-- Motion control is implemented using **open-loop time-based velocity commands**.
-- Small errors accumulate due to timing differences and simulator behavior.
-- In real robots additional factors such as friction, wheel slip, and sensor noise may affect motion accuracy.
-
----
-
-# Author
-
-Group 1:  
-Project: JetAuto Motion Control Pattern
+```
+scripts/real_square_motion.py   ROS node (rospy)
+package.xml, CMakeLists.txt     catkin package definition
+```

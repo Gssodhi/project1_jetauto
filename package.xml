@@ -2,7 +2,7 @@
 <package format="2">
   <name>project1_jetauto</name>
   <version>0.0.0</version>
-  <description>The project1_jetauto package</description>
+  <description>Timed velocity-command controller that drives a JetAuto robot around a rounded-square path</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
